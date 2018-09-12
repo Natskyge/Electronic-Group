@@ -1,25 +1,25 @@
 int sensorData;
 int sensorLeft = A0;
-String leftValue = "x";
 int sensorMidLeft = A1;
-String midLeftValue = "x";
 int sensorMidRight = A2;
-String midRightValue = "x";
 int sensorRight = A3;
-String rightValue = "x";
+int leftValue = B0;
+int midLeftValue = B0;
+int midRightValue = B0;
+int rightValue = B0;
 
-String values = "";
-String midValues = "";
+int midValues = 0;
+int sideValues = 0;
 int blackWhiteSwitch = 300;
 
 
-String sensorRead(int sensorPin){
+int sensorRead(int sensorPin){
   sensorData = analogRead(sensorPin);
   if(sensorData <= blackWhiteSwitch){
-    return "b";
+    return B1;
   }
   else{
-    return "w";
+    return B0;
   }
 }
 
@@ -32,16 +32,58 @@ Serial.begin(9600);
 
 void loop() {
   // put your main code here, to run repeatedly:
-leftValue = sensorRead(sensorLeft);
 midLeftValue = sensorRead(sensorMidLeft);
 midRightValue = sensorRead(sensorMidRight);
+
+leftValue = sensorRead(sensorLeft);
 rightValue = sensorRead(sensorRight);
 
-midValues = midLeftValue + midRightValue;
-values = leftValue + midLeftValue + midRightValue + rightValue;
+midValues = (midLeftValue<<1) + midRightValue;
 
-Serial.println(values);
+switch(midValues){
 
+  case B11:
+    //move forward
+    break;
+
+  case B10:
+    //Move left 
+    break;
+
+  case B01:
+    //Move Right
+    break;
+
+  case B00:
+    //Panic mode
+    sideValues = (leftValue<<1) + rightValue;  
+
+    switch(sideValues){
+            case B11:
+              //lol idk
+              break;
+
+            case B10:
+              //lol idk
+              break;
+
+            case B01:
+              //lol idk
+              break;
+
+            case B00:
+              //MEGAPANIC
+              break;
+
+            default:
+              break;
+         
+    }
+    break;
+  
+  default: 
+    break; 
+  }
 }
 
 
