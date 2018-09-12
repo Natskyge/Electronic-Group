@@ -32,69 +32,62 @@ Serial.begin(9600);
 
 void loop() {
   // put your main code here, to run repeatedly:
-midLeftValue = sensorRead(sensorMidLeft);
-midRightValue = sensorRead(sensorMidRight);
+  midLeftValue = sensorRead(sensorMidLeft);
+  midRightValue = sensorRead(sensorMidRight);
 
-leftValue = sensorRead(sensorLeft);
-rightValue = sensorRead(sensorRight);
+  leftValue = sensorRead(sensorLeft);
+  rightValue = sensorRead(sensorRight);
 
-midValues = (midLeftValue<<1) + midRightValue;
+  midValues = (midLeftValue<<1) + midRightValue;
 
-switch(midValues){
+  switch(midValues){
 
-  case B11:
-    //move forward
-    break;
+    case B11:
+      //move forward
+      break;
 
-  case B10:
-    //Move left 
-    break;
+    case B10:
+      //Move left 
+      break;
 
-  case B01:
-    //Move Right
-    break;
+    case B01:
+      //Move Right
+      break;
 
-  case B00:
-    //Panic mode
-    sideValues = (leftValue<<1) + rightValue;  
+    case B00:
+      //Panic mode
+      sideValues = (leftValue<<1) + rightValue;  
 
-    switch(sideValues){
-            case B11:
-              //lol idk
-              break;
+      switch(sideValues){
+              case B11:
+                //lol idk
+                break;
 
-            case B10:
-              //lol idk
-              break;
+              case B10:
+                //lol idk
+                break;
 
-            case B01:
-              //lol idk
-              break;
+              case B01:
+                //lol idk
+                break;
 
-            case B00:
-              //MEGAPANIC
-              break;
+              case B00:
+                //MEGAPANIC
+                break;
 
-            default:
-              break;
-         
-    }
-    break;
+              default:
+                break;
+           
+      }
+      break;
   
-  default: 
-    break; 
-  }
+    default: 
+      break; 
+    }
+
+  Serial.println(midValues);
+  
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
