@@ -20,22 +20,33 @@ void setup() {
   Serial.begin(9600);
 }
 
+void loop() {
+  forward();
+  delay(2000);
+  turnLeft();
+  delay(2000);
+  forward();
+  delay(2000);
+  turnRight();
+  delay(2000);
+}
+
 void controlWheel(int side, int dirc, int spd) {
-  int pinPWM, pinA, pinB;
-  if (side == LEFT) {
-    // Select pins for controlling left wheel
-    pinA = pinLeftA;
-    pinB = pinLeftB;
-    pinPWM = pinLeftPWM;
-  } else if (side == RIGHT) {
-    // Select pins for controlling right wheel
+  delay(10);
+  // Select wheel
+  int pinA, pinB, pinPWM;
+  if (side == RIGHT) {
     pinA = pinRightA;
     pinB = pinRightB;
     pinPWM = pinRightPWM;
+  } else if (side == LEFT) {
+    pinA = pinLeftA;
+    pinB = pinLeftB;
+    pinPWM = pinLeftPWM;
   } else {
     return;
   }
-
+  
   // Give commands to selected wheel
   analogWrite(pinPWM, spd);
   switch (dirc) {
@@ -58,17 +69,17 @@ void controlWheel(int side, int dirc, int spd) {
   delay(10);
 }
 
-void loop() {
-  controlWheel(LEFT,FORWARD, 255);
-  // controlWheel(RIGHT,FORWARD, 255);
-  delay(5000);
-
-  controlWheel(LEFT,BACKWARD, 255);
-  // controlWheel(RIGHT,BACKWARD, 255);
-  delay(5000);
-
-  controlWheel(LEFT,STILL, 255);
-  // controlWheel(RIGHT,STILL, 255);
-  delay(5000);
+void turnLeft(void) {
+  controlWheel(RIGHT, FORWARD, 255);
+  controlWheel(LEFT, FORWARD, 0);
 }
 
+void turnRight(void) {
+  controlWheel(LEFT, FORWARD, 255);
+  controlWheel(RIGHT, FORWARD, 0);
+}
+
+void forward(void) {
+  controlWheel(LEFT, FORWARD, 255);
+  controlWheel(RIGHT, FORWARD, 255);
+}
