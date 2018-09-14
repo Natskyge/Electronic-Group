@@ -36,11 +36,11 @@ float prevError = 0;
 
 float controlVar = 0;
 
-int maxSpeed = 170;
+int maxSpeed = 200;
 
-float K_p = 180; //180
-float K_i = 15; // 15
-float K_d = 30; // 30
+float K_p = 198; // 180
+float K_i = 396; // 15
+float K_d = 66; // 30
 
 //Motor values
 int pinLeftA = 12;
@@ -153,10 +153,21 @@ void setup() {
 }
 
 void wheel(int side, int spd) {
+  int truSpd = 0;
   if (spd < 0) {
-    controlWheel(side,BACKWARD,speedLimiter(-spd));
+    truSpd = -spd;
+    if (truSpd > maxSpeed) {
+      truSpd = maxSpeed;
+    }
+    Serial.println("BACKWARD");
+    controlWheel(side,BACKWARD,truSpd);
   } else {
-    controlWheel(side,FORWARD,speedLimiter(spd));
+    truSpd = spd;
+    if (truSpd > maxSpeed) {
+      truSpd = maxSpeed;
+    }
+    Serial.println("FORWARD");
+    controlWheel(side,FORWARD,truSpd);
   }
 }
 
@@ -166,10 +177,8 @@ void loop() {
 
   controlVar = K_p*errorTerm + K_i*integrateError(errorTerm) + K_d*diffError(errorTerm,prevError);
 
-  wheel(LEFT,speedLimiter(maxSpeed+controlVar));
-  wheel(RIGHT,speedLimiter(maxSpeed-controlVar));
-
-  Serial.println(controlVar);
+  wheel(LEFT,maxSpeed+controlVar);
+  wheel(RIGHT,maxSpeed-controlVar);
 
   prevError = errorTerm;
   delay(timeStep*1000);
