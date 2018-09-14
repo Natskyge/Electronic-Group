@@ -1,20 +1,26 @@
 //Sensor Values
 int sensorData;
 
-int sensorLeft = A0;
-int sensorMidLeft = A1;
-int sensorMidRight = A2;
-int sensorRight = A3;
+int sensorExtraLeft = A0;
+int sensorLeft = A1;
+int sensorMidLeft = A2;
+int sensorMidRight = A3;
+int sensorRight = A4;
+int sensorExtraRight = A5;
 
+int extraLeftValue = B0;
 int leftValue = B0;
 int midLeftValue = B0;
 int midRightValue = B0;
 int rightValue = B0;
+int extraRightValue = B0;
 
+int extraLeftDistance = 7;
 int leftDistance = 4;
 int midLeftDistance = 1;
 int midRightDistance = -1;
 int rightDistance = -4;
+int extraRightDistance = -7;
 
 int blackWhiteSwitch = 300;
 
@@ -32,7 +38,7 @@ float controlVar = 0;
 
 int maxSpeed = 170;
 
-float K_p = 200; //180
+float K_p = 180; //180
 float K_i = 15; // 15
 float K_d = 30; // 30
 
@@ -101,12 +107,15 @@ void controlWheel(int side, int dirc, int spd) {
 }
 
 float error(void) {
+  int extraLeftValue = sensorRead(sensorExtraLeft);
   int leftValue = sensorRead(sensorLeft);
   int midLeftValue = sensorRead(sensorMidLeft);
   int midRightValue = sensorRead(sensorMidRight);
   int rightValue = sensorRead(sensorRight);
+  int extraRightValue = sensorRead(sensorExtraRight);
   
-  float procesVar = 0.25*(leftDistance*leftValue+midLeftDistance*midLeftValue+midRightDistance*midRightValue+rightDistance*rightValue);
+  float procesVar = 0.16*(extraLeftDistance*extraLeftValue + leftDistance*leftValue + midLeftDistance*midLeftValue + midRightDistance*midRightValue + rightDistance*rightValue + extraRightDistance*extraRightValue);
+  
   float setPoint = 0;
 
   return setPoint - procesVar;
@@ -143,14 +152,22 @@ void setup() {
 
 }
 
+void wheel(int side, int spd) {
+  if (spd < 0) {
+    controlWheel(side,BACKWARD,speedLimiter(-spd));
+  } else {
+    controlWheel(side,FORWARD,speedLimiter(spd));
+  }
+}
+
 void loop() {
   errorTerm = error();
   cycleCount = cycleCount + 1;
 
   controlVar = K_p*errorTerm + K_i*integrateError(errorTerm) + K_d*diffError(errorTerm,prevError);
 
-  controlWheel(LEFT,FORWARD,speedLimiter(maxSpeed+controlVar));
-  controlWheel(RIGHT,FORWARD,speedLimiter(maxSpeed-controlVar));
+  wheel(LEFT,speedLimiter(maxSpeed+controlVar));
+  wheel(RIGHT,speedLimiter(maxSpeed-controlVar));
 
   Serial.println(controlVar);
 
