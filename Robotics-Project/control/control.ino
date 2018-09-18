@@ -1,4 +1,4 @@
-//Bluetooth Values
+// Bluetooth Values
 #include <SoftwareSerial.h>
 int bluetoothTx=2;
 int bluetoothRx=3;
@@ -6,13 +6,16 @@ SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
 char data = ' ';
 bool manual = true;
 
-//Canon value
+
+// Canon value
 int canonPin=5;
 
-//Gear value
+
+// Gear value
 int gear = 255;
 
-//Sensor Values
+
+// Sensor Values
 int sensorData;
 int sensorExtraLeft = A0;
 int sensorLeft = A1;
@@ -36,6 +39,7 @@ int rightDistance = -5;
 int extraRightDistance = -8;
 int blackWhiteSwitch = 450;
 
+
 // PID Constants
 float timeStep = 0.001; // Seconds
 float sumError = 0;
@@ -47,7 +51,8 @@ float K_p = 200; // Proportional control weight
 float K_i = 400; // Integral control weight
 float K_d = 70;  // Differntal control weight
 
-//Motor values
+
+// Motor values
 int pinLeftA = 12;
 int pinLeftB = 13;
 int pinLeftPWM = 11;
@@ -60,8 +65,9 @@ int pinRightPWM = 6;
 #define LEFT 4
 #define RIGHT 5
 
+
 //------Basic control functions------//
-// Sensor white/black function
+// Sensor white/black function - 1=black 0=white
 int sensorRead(int sensorPin){
   sensorData = analogRead(sensorPin);
   if(sensorData <= blackWhiteSwitch){
@@ -73,9 +79,9 @@ int sensorRead(int sensorPin){
 }
 
 
-//Wheel rotation function
+// Wheel rotation function
 void controlWheel(int side, int dirc, int spd) {
-  // Select wheel
+  // Select wheel, choose adequite pins
   int pinA, pinB, pinPWM;
   if (side == RIGHT) {
     pinA = pinRightA;
@@ -100,10 +106,6 @@ void controlWheel(int side, int dirc, int spd) {
       digitalWrite(pinA, LOW);
       digitalWrite(pinB, HIGH);
       break;
-    case STILL:
-      digitalWrite(pinA, LOW);
-      digitalWrite(pinB, LOW);
-      break;
     default:
      // NOTHING!
      break;
@@ -111,7 +113,7 @@ void controlWheel(int side, int dirc, int spd) {
 }
 
 //------Bluetooth control functions------//
-//Directional movement functions
+// Directional movement functions
 void turnLeft(void) {
   controlWheel(RIGHT, FORWARD, gear);
   controlWheel(LEFT, FORWARD, gear/2);
@@ -137,6 +139,8 @@ void stopMovement(void) {
     controlWheel(RIGHT, FORWARD, 0);
 }
 
+
+// Checks for manual/automatic mode
 bool manualCheck(char btData, bool manualBool){
   switch(btData){
 
@@ -155,6 +159,7 @@ bool manualCheck(char btData, bool manualBool){
 }
 
 
+// All controlls for manual/bluetooth
 void btControl(char btData){
   
   if(data=='E'){
@@ -184,7 +189,8 @@ void btControl(char btData){
      case 'B':
         backward();
         break;
-      
+
+      // Gear functions
       case '6':
         gear=255;
         break;
@@ -209,12 +215,14 @@ void btControl(char btData){
         gear=50;
         break;
       
-     default:
+      default:
+        //Nothing!
         break;
    
     }
   }    
 }
+
 
 //------PID control functions------//
 // PID Error function
@@ -226,13 +234,11 @@ float error(void) {
   int midRightValue = sensorRead(sensorMidRight);
   int rightValue = sensorRead(sensorRight);
   int extraRightValue = sensorRead(sensorExtraRight);
-  
-  float procesVar = 0.16*(extraLeftDistance*extraLeftValue + leftDistance*leftValue + midLeftDistance*midLeftValue + midRightDistance*midRightValue + rightDistance*rightValue + extraRightDistance*extraRightValue);
-  
-  float setPoint = 0;
 
-  // Calculates diffrence from setPoint, IE how unballanced the car is
-  return setPoint - procesVar;
+  //Calculations for error/unballance
+  float procesVar = 0.16*(extraLeftDistance*extraLeftValue + leftDistance*leftValue + midLeftDistance*midLeftValue + midRightDistance*midRightValue + rightDistance*rightValue + extraRightDistance*extraRightValue);
+  float setPoint = 0;
+  return setPoint - procesVar;  // Calculates diffrence from setPoint, IE how unballanced the car is
 }
 
 // Differntiate error function
@@ -251,12 +257,14 @@ float integrateError(float error) {
 // Wheel control function, negative spd = drives backwards
 void wheel(int side, int spd) {
   int truSpd = 0;
+  // Wheel turning backwards
   if (spd < 0) {
     truSpd = -spd;
     if (truSpd > maxSpeed) {
       truSpd = maxSpeed; // Speed to high
     }
     controlWheel(side,BACKWARD,truSpd);
+  // Wheel turning forwards
   } else {
     truSpd = spd;
     if (truSpd > maxSpeed) {
@@ -265,6 +273,7 @@ void wheel(int side, int spd) {
     controlWheel(side,FORWARD,truSpd);
   }
 }
+
 
 void setup() {
   pinMode(pinLeftA, OUTPUT);
@@ -279,6 +288,7 @@ void setup() {
   Serial.begin(9600);
   bluetooth.begin(115200);
 }
+
 
 void loop() {
   // Connect to bluetooth
