@@ -1,13 +1,14 @@
+#define FORWARD 1
+#define BACKWARD 2
+#define STOP 3
+
 const int buttonPin = 2;
 const int inputPin1 = 3;
 const int inputPin2 = 4;
 bool buttonState = LOW;
+bool prevButtonState = LOW;
+int currentDir = STOP;
 int start = 0;
-
-#define FORWARD 1
-#define BACKWARD 2
-#define STOP 3
- 
 
 void setup() {
   // put your setup code here, to run once:
@@ -22,14 +23,17 @@ void controlStab(int dirc) {
     case FORWARD:
       digitalWrite(inputPin1, LOW);
       digitalWrite(inputPin2, HIGH);
+      break;
     case BACKWARD:
       digitalWrite(inputPin1, HIGH);
       digitalWrite(inputPin2, LOW);
+      break;
     case STOP:
       digitalWrite(inputPin1, LOW);
       digitalWrite(inputPin2, LOW);
+      break;
     default:
-      // NOTHING
+      // NOTHING!
       break;
   }
 }
@@ -37,9 +41,25 @@ void controlStab(int dirc) {
 
 void loop() {
   buttonState = digitalRead(buttonPin);
-  if (buttonState == HIGH){
-    start = 1;
-  } else { start =0;}
-
+  controlStab(currentDir);
+  if (prevButtonState == LOW && buttonState == HIGH) {
+    switch (currentDir) {
+      case STOP:
+        currentDir = FORWARD;
+        break;
+      case FORWARD:
+        currentDir = BACKWARD;
+        break;
+      case BACKWARD:
+        currentDir = STOP;
+        break;
+      default:
+        // NOTHING!
+        break;
+    }
+  }
+  
+  prevButtonState = buttonState;
   Serial.println(start);
+  delay(100);
 }
