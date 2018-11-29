@@ -5,6 +5,7 @@
 const int buttonPin = 2;
 const int inputPin1 = 3;
 const int inputPin2 = 4;
+const int voltagePin = A0;
 bool buttonState = LOW;
 bool prevButtonState = LOW;
 int currentDir = STOP;
@@ -41,7 +42,6 @@ void controlStab(int dirc) {
 
 void loop() {
   buttonState = digitalRead(buttonPin);
-  controlStab(currentDir);
   if (prevButtonState == LOW && buttonState == HIGH) {
     switch (currentDir) {
       case STOP:
@@ -57,9 +57,18 @@ void loop() {
         // NOTHING!
         break;
     }
+    controlStab(currentDir);
+    delay(500);
+  } else {
+    int sensorVal = analogRead(voltagePin);
+    float voltage = sensorVal*(5.0/1023.0);
+    Serial.println(voltage);
+  
+    if (3.5 < voltage) {
+      currentDir = STOP;
+    }
   }
   
   prevButtonState = buttonState;
-  Serial.println(start);
   delay(100);
 }
