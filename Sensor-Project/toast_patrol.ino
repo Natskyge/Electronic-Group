@@ -28,8 +28,10 @@ int iterations = 0;
 bool toastGood = false;
 int upperToastBound = 439;
 int lowerToastBound = 363;
+bool firstRun = true;
 
 // data vi sender
+byte data=B10000001;
 byte nop=B11111111;
 
 //bit på glad smiley
@@ -67,7 +69,6 @@ void setup() {
   pinMode (SH_CP_clockPin1,OUTPUT);
   pinMode (ST_CP_latchPin1,OUTPUT);
   pinMode (DS_dataPin1,OUTPUT);
-  displayBlank();
   Serial.begin(9600);
 }
 
@@ -100,8 +101,18 @@ void judgeToast(int iterations) {
   }
 }
 
+void displayBlank(){
+  digitalWrite (ST_CP_latchPin1,LOW);
+  digitalWrite (ST_CP_latchPin0,LOW); 
+  shiftOut(DS_dataPin1,SH_CP_clockPin1,LSBFIRST,nop);
+  shiftOut(DS_dataPin1,SH_CP_clockPin1,LSBFIRST,nop); 
+  shiftOut(DS_dataPin0,SH_CP_clockPin0,LSBFIRST,nop);
+  digitalWrite (ST_CP_latchPin1,HIGH);  
+  digitalWrite (ST_CP_latchPin0,HIGH);
+}
+
 void sursmil(){
-    for (int i=0; i<=3; i++){
+  for (int i=0; i<=3; i++){
     digitalWrite (ST_CP_latchPin1,LOW);
     digitalWrite (ST_CP_latchPin0,LOW); 
     shiftOut(DS_dataPin1,SH_CP_clockPin1,LSBFIRST,nop); 
@@ -109,11 +120,12 @@ void sursmil(){
     shiftOut(DS_dataPin0,SH_CP_clockPin0,LSBFIRST,rike[i]);
     digitalWrite (ST_CP_latchPin1,HIGH);  
     digitalWrite (ST_CP_latchPin0,HIGH);
-    }
+  }
+  displayBlank();
 }
 
 void smilglad(){
-    for (int i=0; i<=3; i++){
+  for (int i=0; i<=3; i++){
     digitalWrite (ST_CP_latchPin1,LOW);
     digitalWrite (ST_CP_latchPin0,LOW); 
     shiftOut(DS_dataPin1,SH_CP_clockPin1,LSBFIRST,gladsmil[i]);
@@ -122,27 +134,24 @@ void smilglad(){
     digitalWrite (ST_CP_latchPin1,HIGH);  
     digitalWrite (ST_CP_latchPin0,HIGH);
   }
+  displayBlank();
 }
 
-void displayBlank(){
-    for (int i=0; i<=3; i++){
-    digitalWrite (ST_CP_latchPin1,LOW);
-    digitalWrite (ST_CP_latchPin0,LOW); 
-    shiftOut(DS_dataPin1,SH_CP_clockPin1,LSBFIRST,nop);
-    shiftOut(DS_dataPin1,SH_CP_clockPin1,LSBFIRST,nop); 
-    shiftOut(DS_dataPin0,SH_CP_clockPin0,LSBFIRST,nop);
-    digitalWrite (ST_CP_latchPin1,HIGH);  
-    digitalWrite (ST_CP_latchPin0,HIGH);
-  }
-}
+
 
 void loop() {
-  judgeToast(iterations);
-
+  if (runGoing == true || firstRun == true) {
+    displayBlank();
+  } else if (toastGood == true) {
+    smilglad();
+  } else {
+    sursmil();
+  }
 
   //Acts if button pressed
   buttonValue = digitalRead(buttonPin);
   if (prevButtonValue == LOW && buttonValue == HIGH) {
+    firstRun = false;
     switch (currentDir){
       //Starts test
       case STOP:  
@@ -180,12 +189,6 @@ void loop() {
     switch (currentDir){
       case FORWARD:
         judgeToast(iterations);
-        
-        if (toastGood==true){
-          smilglad();
-        } else {
-          sursmil();
-        }
         currentDir = BACKWARD;
         stateSwitch = true;
         runGoing = false;
